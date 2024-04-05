@@ -2,13 +2,15 @@
 nanomsg_proto = Proto("nanomsg","nanomsg protocol")
 
 -- header messages
-local f_header = ProtoField.bytes("nanomsg.header", "Header")
+local f_header = ProtoField.uint32("nanomsg.header", "Header", base.HEX)
 local f_protocol = ProtoField.string("nanomsg.protocol", "Protocol")
 local f_reserved = ProtoField.uint16("nanomsg.reserved", "Reserved", base.HEX)
 
 -- payload messages
 local f_payload_size = ProtoField.uint64("nanomsg.payload_size", "Payload Size")
 local f_payload = ProtoField.bytes("nanomsg.payload", "Payload")
+
+local msgpack = Dissector.get("msgpack")
 
 nanomsg_proto.fields = { f_header, f_protocol, f_reserved, f_body, f_payload_size, f_payload }
 
@@ -55,13 +57,12 @@ function dissect_payload(buffer,pinfo,tree)
     local subtree = tree:add(nanomsg_proto, buffer(), "nanomsg")
 
     subtree:add(f_payload_size, buffer(0,8))
-    subtree:add(f_payload,buffer(8))
+    paylod_tree = subtree:add(f_payload,buffer(8))
 
     pinfo.cols.protocol = "nanomsg"
 
     -- call the msgpack dissector
-    local msgpack = Dissector.get("msgpack")
-    msgpack:call(buffer(8):tvb(), pinfo, tree)
+    msgpack:call(buffer(8):tvb(), pinfo, paylod_tree)
 
 end
 
