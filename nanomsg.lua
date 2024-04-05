@@ -59,9 +59,9 @@ function dissect_payload(buffer,pinfo,tree)
 
     pinfo.cols.protocol = "nanomsg"
 
-    -- -- call the msgpack dissector
-    -- local msgpack = Dissector.get("msgpack")
-    -- dissector:call(msgpack, buffer(8):tvb(), pinfo, tree)
+    -- call the msgpack dissector
+    local msgpack = Dissector.get("msgpack")
+    msgpack:call(buffer(8):tvb(), pinfo, tree)
 
 end
 
